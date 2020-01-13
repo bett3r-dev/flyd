@@ -528,10 +528,13 @@ function streamToString() {
  */
 function createStream() {
   function s(n) {
+    s.push(n);
+  }
+  s.push = function(n) {
     if (arguments.length === 0) return s.val
     updateStreamValue(n, s);
     return s
-  }
+  };
   s.hasVal = false;
   s.val = undefined;
   s.updaters = [];
@@ -641,7 +644,7 @@ function updateStream(s) {
  * @param {stream} stream
  */
 function updateListeners(s) {
-  var i, o, list;
+  var i, o, list;;;
   var listeners = s.listeners;
   for (i = 0; i < listeners.length; ++i) {
     list = listeners[i];

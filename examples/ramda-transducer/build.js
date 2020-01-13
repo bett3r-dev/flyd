@@ -9602,13 +9602,13 @@ var _curryN_1 = _curryN$1;
  */
 
 
-var curryN$1 = /*#__PURE__*/_curry2_1(function curryN(length, fn) {
+var curryN$2 = /*#__PURE__*/_curry2_1(function curryN(length, fn) {
   if (length === 1) {
     return _curry1_1(fn);
   }
   return _arity_1(length, _curryN_1(length, [], fn));
 });
-var curryN_1 = curryN$1;
+var curryN_1 = curryN$2;
 
 // Utility
 function isFunction(obj) {
@@ -9794,10 +9794,10 @@ flyd.endsOn = function(endS, s) {
  * var squaredNumbers = flyd.map(function(n) { return n*n; }, numbers);
  */
 // Library functions use self callback to accept (null, undefined) update triggers.
-function map$1(f, s) {
+function map$2(f, s) {
   return combine(function(s, self) { self(f(s.val)); }, [s]);
 }
-flyd.map = curryN_1(2, map$1);
+flyd.map = curryN_1(2, map$2);
 
 /**
  * Chain a stream
@@ -9820,7 +9820,7 @@ flyd.map = curryN_1(2, map$1);
  *   return flyd.stream(findUsers(filter));
  * }, filter);
  */
-flyd.chain = curryN_1(2, chain$1);
+flyd.chain = curryN_1(2, chain$2);
 
 /**
  * Apply a stream
@@ -9846,7 +9846,7 @@ flyd.chain = curryN_1(2, chain$1);
  *   .pipe(ap(n2));
  * added_pipe() // 3
  */
-flyd.ap = curryN_1(2, ap$1);
+flyd.ap = curryN_1(2, ap$2);
 
 /**
  * Listen to stream events
@@ -9994,7 +9994,7 @@ flyd.curryN = curryN_1;
  * var numbers = flyd.stream(0);
  * var squaredNumbers = numbers.map(function(n) { return n*n; });
  */
-function boundMap(f) { return map$1(f, this); }
+function boundMap(f) { return map$2(f, this); }
 
 /**
  * Returns the result of applying function `fn` to this stream
@@ -10012,10 +10012,10 @@ function boundMap(f) { return map$1(f, this); }
 function operator_pipe(f) { return f(this) }
 
 function boundChain(f) {
-  return chain$1(f, this);
+  return chain$2(f, this);
 }
 
-function chain$1(f, s) {
+function chain$2(f, s) {
   // Internal state to end flat map stream
   var flatEnd = flyd.stream(1);
   var internalEnded = flyd.on(function() {
@@ -10036,7 +10036,7 @@ function chain$1(f, s) {
     internalEnded(newS.end);
 
     // Update self on call -- newS is never handed out so deps don't matter
-    last = map$1(own, newS);
+    last = map$2(own, newS);
   }, [s]);
 
   flyd.endsOn(flatEnd.end, flatStream);
@@ -10082,19 +10082,19 @@ flyd.flattenPromise = function flattenPromise(s) {
  * var addToNumbers1 = flyd.map(add, numbers1);
  * var added = addToNumbers1.ap(numbers2);
  */
-function ap$1(s2, s1) {
+function ap$2(s2, s1) {
   return combine(function(s1, s2, self) { self(s1.val(s2.val)); }, [s1, s2]);
 }
 
 function boundAp(s2) {
-  return ap$1(s2, this);
+  return ap$2(s2, this);
 }
 
 /**
  * @private
  */
 function fantasy_land_ap(s1) {
-  return ap$1(this, s1);
+  return ap$2(this, s1);
 }
 
 /**
@@ -10138,10 +10138,13 @@ function streamToString() {
  */
 function createStream() {
   function s(n) {
+    s.push(n);
+  }
+  s.push = function(n) {
     if (arguments.length === 0) return s.val
     updateStreamValue(n, s);
     return s
-  }
+  };
   s.hasVal = false;
   s.val = undefined;
   s.updaters = [];
@@ -10251,7 +10254,7 @@ function updateStream(s) {
  * @param {stream} stream
  */
 function updateListeners(s) {
-  var i, o, list;
+  var i, o, list;;;
   var listeners = s.listeners;
   for (i = 0; i < listeners.length; ++i) {
     list = listeners[i];
