@@ -8,26 +8,25 @@
     "example": "examples",
     "test": "test"
   },
-  "dependencies": {
-    "ramda": "^0.25.0",
-    "whatwg-fetch": "^3.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "benchmark": "^1.0.0",
     "bluebird": "^2.9.13",
     "browserify": "^10.2.4",
     "coveralls": "^2.11.2",
-    "eslint": "^2.7.0",
+    "eslint": "~6.8.0",
     "istanbul": "^0.3.15",
     "mocha": "^2.2.1",
     "mocha-lcov-reporter": "0.0.2",
     "np": "^2.19.0",
+    "ramda": "^0.25.0",
     "rollup": "^0.56.2",
     "rollup-plugin-commonjs": "^8.3.0",
     "rollup-plugin-node-resolve": "^3.0.3",
     "rollup-plugin-replace": "^2.0.0",
     "rollup-plugin-uglify": "^3.0.0",
-    "transducers.js": "0.3.x"
+    "transducers.js": "0.3.x",
+    "whatwg-fetch": "^3.0.0"
   },
   "scripts": {
     "test-lib": "mocha",

@@ -6,6 +6,11 @@
   "globals": {
     "Symbol": true
   },
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "allowImportExportEverywhere": true
+  },
   "rules": {
     "no-eval": 2,
     "eqeqeq": 0,

@@ -8,12 +8,12 @@ module.exports = function mergeAll(streams) {
       return;
     }
     [].slice.call(arguments, 0, arguments.length - 2)
-    .some(function(s1) {
-      if (s1.hasVal) {
-        self(s1.val);
-        return true;
-      }
-    });
+      .some(function(s1) {
+        if (s1.hasVal) {
+          self(s1.val);
+          return true;
+        }
+      });
   }, streams));
   flyd.endsOn(flyd.combine(function() {
     return true;

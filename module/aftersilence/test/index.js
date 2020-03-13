@@ -28,9 +28,9 @@ describe('afterSilence', function() {
     setTimeout(push, 175);
     setTimeout(function() {
       assert.deepEqual(result, [
-          [0, 1, 2],
-          [3, 4, 5, 6],
-          [7]
+        [0, 1, 2],
+        [3, 4, 5, 6],
+        [7]
       ]);
       done();
     }, 240);

@@ -1029,8 +1029,8 @@ describe('stream', function() {
       };
       stream(1).map(function() {
         stream(0)
-        .map(mapper)
-        .map(mapper);
+          .map(mapper)
+          .map(mapper);
       });
       assert.equal(invocationCount, 2);
     });

@@ -19,8 +19,8 @@ var extractProps = function(obj) {
   for (var key in obj) {
     if (obj.hasOwnProperty(key)) {
       newObj[key] = isPlainObject(obj[key]) ? extractProps(obj[key])
-                  : flyd.isStream(obj[key]) ? obj[key]()
-                                            : obj[key];
+        : flyd.isStream(obj[key]) ? obj[key]()
+          : obj[key];
     }
   }
   return newObj;
@@ -29,8 +29,8 @@ var extractProps = function(obj) {
 var stream = function(obj) {
   var streams = Object.keys(obj).map(function(key) {
     return isPlainObject(obj[key]) ? stream(obj[key])
-         : flyd.isStream(obj[key]) ? obj[key]
-                                   : flyd.stream(obj[key]);
+      : flyd.isStream(obj[key]) ? obj[key]
+        : flyd.stream(obj[key]);
   });
   return flyd.combine(function() {
     return extractProps(obj);
