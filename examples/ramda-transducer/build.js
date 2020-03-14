@@ -9412,204 +9412,6 @@ var es = Object.freeze({
 	zipWith: zipWith
 });
 
-function _arity$1(n, fn) {
-  /* eslint-disable no-unused-vars */
-  switch (n) {
-    case 0:
-      return function () {
-        return fn.apply(this, arguments);
-      };
-    case 1:
-      return function (a0) {
-        return fn.apply(this, arguments);
-      };
-    case 2:
-      return function (a0, a1) {
-        return fn.apply(this, arguments);
-      };
-    case 3:
-      return function (a0, a1, a2) {
-        return fn.apply(this, arguments);
-      };
-    case 4:
-      return function (a0, a1, a2, a3) {
-        return fn.apply(this, arguments);
-      };
-    case 5:
-      return function (a0, a1, a2, a3, a4) {
-        return fn.apply(this, arguments);
-      };
-    case 6:
-      return function (a0, a1, a2, a3, a4, a5) {
-        return fn.apply(this, arguments);
-      };
-    case 7:
-      return function (a0, a1, a2, a3, a4, a5, a6) {
-        return fn.apply(this, arguments);
-      };
-    case 8:
-      return function (a0, a1, a2, a3, a4, a5, a6, a7) {
-        return fn.apply(this, arguments);
-      };
-    case 9:
-      return function (a0, a1, a2, a3, a4, a5, a6, a7, a8) {
-        return fn.apply(this, arguments);
-      };
-    case 10:
-      return function (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-        return fn.apply(this, arguments);
-      };
-    default:
-      throw new Error('First argument to _arity must be a non-negative integer no greater than ten');
-  }
-}
-var _arity_1 = _arity$1;
-
-function _isPlaceholder$1(a) {
-       return a != null && typeof a === 'object' && a['@@functional/placeholder'] === true;
-}
-var _isPlaceholder_1 = _isPlaceholder$1;
-
-/**
- * Optimized internal one-arity curry function.
- *
- * @private
- * @category Function
- * @param {Function} fn The function to curry.
- * @return {Function} The curried function.
- */
-
-
-function _curry1$1(fn) {
-  return function f1(a) {
-    if (arguments.length === 0 || _isPlaceholder_1(a)) {
-      return f1;
-    } else {
-      return fn.apply(this, arguments);
-    }
-  };
-}
-var _curry1_1 = _curry1$1;
-
-/**
- * Optimized internal two-arity curry function.
- *
- * @private
- * @category Function
- * @param {Function} fn The function to curry.
- * @return {Function} The curried function.
- */
-
-
-function _curry2$1(fn) {
-  return function f2(a, b) {
-    switch (arguments.length) {
-      case 0:
-        return f2;
-      case 1:
-        return _isPlaceholder_1(a) ? f2 : _curry1_1(function (_b) {
-          return fn(a, _b);
-        });
-      default:
-        return _isPlaceholder_1(a) && _isPlaceholder_1(b) ? f2 : _isPlaceholder_1(a) ? _curry1_1(function (_a) {
-          return fn(_a, b);
-        }) : _isPlaceholder_1(b) ? _curry1_1(function (_b) {
-          return fn(a, _b);
-        }) : fn(a, b);
-    }
-  };
-}
-var _curry2_1 = _curry2$1;
-
-/**
- * Internal curryN function.
- *
- * @private
- * @category Function
- * @param {Number} length The arity of the curried function.
- * @param {Array} received An array of arguments received thus far.
- * @param {Function} fn The function to curry.
- * @return {Function} The curried function.
- */
-
-
-function _curryN$1(length, received, fn) {
-  return function () {
-    var combined = [];
-    var argsIdx = 0;
-    var left = length;
-    var combinedIdx = 0;
-    while (combinedIdx < received.length || argsIdx < arguments.length) {
-      var result;
-      if (combinedIdx < received.length && (!_isPlaceholder_1(received[combinedIdx]) || argsIdx >= arguments.length)) {
-        result = received[combinedIdx];
-      } else {
-        result = arguments[argsIdx];
-        argsIdx += 1;
-      }
-      combined[combinedIdx] = result;
-      if (!_isPlaceholder_1(result)) {
-        left -= 1;
-      }
-      combinedIdx += 1;
-    }
-    return left <= 0 ? fn.apply(this, combined) : _arity_1(left, _curryN$1(length, combined, fn));
-  };
-}
-var _curryN_1 = _curryN$1;
-
-/**
- * Returns a curried equivalent of the provided function, with the specified
- * arity. The curried function has two unusual capabilities. First, its
- * arguments needn't be provided one at a time. If `g` is `R.curryN(3, f)`, the
- * following are equivalent:
- *
- *   - `g(1)(2)(3)`
- *   - `g(1)(2, 3)`
- *   - `g(1, 2)(3)`
- *   - `g(1, 2, 3)`
- *
- * Secondly, the special placeholder value [`R.__`](#__) may be used to specify
- * "gaps", allowing partial application of any combination of arguments,
- * regardless of their positions. If `g` is as above and `_` is [`R.__`](#__),
- * the following are equivalent:
- *
- *   - `g(1, 2, 3)`
- *   - `g(_, 2, 3)(1)`
- *   - `g(_, _, 3)(1)(2)`
- *   - `g(_, _, 3)(1, 2)`
- *   - `g(_, 2)(1)(3)`
- *   - `g(_, 2)(1, 3)`
- *   - `g(_, 2)(_, 3)(1)`
- *
- * @func
- * @memberOf R
- * @since v0.5.0
- * @category Function
- * @sig Number -> (* -> a) -> (* -> a)
- * @param {Number} length The arity for the returned function.
- * @param {Function} fn The function to curry.
- * @return {Function} A new, curried function.
- * @see R.curry
- * @example
- *
- *      var sumArgs = (...args) => R.sum(args);
- *
- *      var curriedAddFourNumbers = R.curryN(4, sumArgs);
- *      var f = curriedAddFourNumbers(1, 2);
- *      var g = f(3);
- *      g(4); //=> 10
- */
-
-
-var curryN$2 = /*#__PURE__*/_curry2_1(function curryN(length, fn) {
-  if (length === 1) {
-    return _curry1_1(fn);
-  }
-  return _arity_1(length, _curryN_1(length, [], fn));
-});
-var curryN_1 = curryN$2;
-
 // Utility
 function isFunction(obj) {
   return !!(obj && obj.constructor && obj.call && obj.apply);
@@ -9677,8 +9479,8 @@ flyd.stream['fantasy-land/of'] = flyd.stream.of = flyd.stream;
  *   return n1() > n2() ? n1() : n2();
  * }, [n1, n2]);
  */
-flyd.combine = curryN_1(2, combine);
 function combine(fn, streams) {
+  if (!streams) return (ss) => combine(fn, ss);
   var i, s, deps, depEndStreams;
   var endStream = createDependentStream([], trueFn);
   deps = []; depEndStreams = [];
@@ -9698,7 +9500,7 @@ function combine(fn, streams) {
   updateStream(s);
   return s;
 }
-
+flyd.combine = combine;
 /**
  * Returns `true` if the supplied argument is a Flyd stream and `false` otherwise.
  *
@@ -9795,9 +9597,10 @@ flyd.endsOn = function(endS, s) {
  */
 // Library functions use self callback to accept (null, undefined) update triggers.
 function map$2(f, s) {
+  if (!s) return ss => map$2(f, ss);
   return combine(function(s, self) { self(f(s.val)); }, [s]);
 }
-flyd.map = curryN_1(2, map$2);
+flyd.map = map$2;
 
 /**
  * Chain a stream
@@ -9820,7 +9623,8 @@ flyd.map = curryN_1(2, map$2);
  *   return flyd.stream(findUsers(filter));
  * }, filter);
  */
-flyd.chain = curryN_1(2, chain$2);
+// flyd.chain = curryN(2,chain);
+flyd.chain = chain$2;
 
 /**
  * Apply a stream
@@ -9846,7 +9650,7 @@ flyd.chain = curryN_1(2, chain$2);
  *   .pipe(ap(n2));
  * added_pipe() // 3
  */
-flyd.ap = curryN_1(2, ap$2);
+flyd.ap = ap$2;
 
 /**
  * Listen to stream events
@@ -9862,9 +9666,10 @@ flyd.ap = curryN_1(2, ap$2);
  * @param {stream} stream - the stream
  * @return {stream} an empty stream (can be ended)
  */
-flyd.on = curryN_1(2, function(f, s) {
+flyd.on = function(f, s) {
+  if (!s) return ss => flyd.on(f, ss);
   return combine(function(s) { f(s.val); }, [s]);
-});
+};
 
 /**
  * Creates a new stream with the results of calling the function on every incoming
@@ -9884,13 +9689,15 @@ flyd.on = curryN_1(2, function(f, s) {
  * numbers(2)(3)(5);
  * sum(); // 10
  */
-flyd.scan = curryN_1(3, function(f, acc, s) {
+flyd.scan = function(f, acc, s) {
+  if ([null, undefined].includes(acc)) return function(acc1, s1) { return flyd.scan(f, acc1, s1)}
+  else if (!s) return function(s2) { return flyd.scan(f, acc, s2)}
   var ns = combine(function(s, self) {
     self(acc = f(acc, s.val));
   }, [s]);
   if (!ns.hasVal) ns(acc);
   return ns;
-});
+};
 
 /**
  * Creates a new stream down which all values from both `stream1` and `stream2`
@@ -9910,7 +9717,8 @@ flyd.scan = curryN_1(3, function(f, acc, s) {
  * button2Elm.addEventListener(btn2Clicks);
  * var allClicks = flyd.merge(btn1Clicks, btn2Clicks);
  */
-flyd.merge = curryN_1(2, function(s1, s2) {
+flyd.merge = function(s1, s2) {
+  if (!s2) return (ss) => flyd.merge(s1, ss);
   var s = flyd.immediate(combine(function(s1, s2, self, changed) {
     if (changed[0]) {
       self(changed[0]());
@@ -9924,7 +9732,7 @@ flyd.merge = curryN_1(2, function(s1, s2) {
     return true;
   }, [s1.end, s2.end]), s);
   return s;
-});
+};
 
 /**
  * Creates a new stream resulting from applying `transducer` to `stream`.
@@ -9947,7 +9755,8 @@ flyd.merge = curryN_1(2, function(s1, s2) {
  * s1(1)(1)(2)(3)(3)(3)(4);
  * results; // => [2, 4, 6, 8]
  */
-flyd.transduce = curryN_1(2, function(xform, source) {
+flyd.transduce = function(xform, source) {
+  if (!source) return ss => flyd.transduce(xform, ss)
   xform = xform(new StreamTransformer());
   return combine(function(source, self) {
     var res = xform['@@transducer/step'](undefined, source.val);
@@ -9958,7 +9767,7 @@ flyd.transduce = curryN_1(2, function(xform, source) {
       return res;
     }
   }, [source]);
-});
+};
 
 /**
  * Returns `fn` curried to `n`. Use this function to curry functions exposed by
@@ -9975,7 +9784,11 @@ flyd.transduce = curryN_1(2, function(xform, source) {
  * var a = flyd.curryN(2, add);
  * a(2)(4) // => 6
  */
-flyd.curryN = curryN_1;
+flyd.curryN = (number, fn) =>
+  function _curry(...args) {
+    if (arguments.length >= fn.length) return fn(...args);
+    return (...argsN)=> _curry(...args, ...argsN);
+  };
 
 /**
  * Returns a new stream identical to the original except every
@@ -10017,6 +9830,7 @@ function boundChain(f) {
 
 function chain$2(f, s) {
   // Internal state to end flat map stream
+  if (!s) return ss => chain$2(f, ss);
   var flatEnd = flyd.stream(1);
   var internalEnded = flyd.on(function() {
     var alive = flatEnd() - 1;
@@ -10083,6 +9897,7 @@ flyd.flattenPromise = function flattenPromise(s) {
  * var added = addToNumbers1.ap(numbers2);
  */
 function ap$2(s2, s1) {
+  if (!s1) return ss => ap$2(s2, ss);
   return combine(function(s1, s2, self) { self(s1.val(s2.val)); }, [s1, s2]);
 }
 
@@ -10137,8 +9952,8 @@ function streamToString() {
  * @return {Function} a flyd stream
  */
 function createStream() {
-  function s(n) {
-    s.push(n);
+  function s() {
+    return s.push.apply(this, arguments);
   }
   s.push = function(n) {
     if (arguments.length === 0) return s.val

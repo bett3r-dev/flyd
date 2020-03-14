@@ -1,5 +1,3 @@
-import curryN from 'ramda/es/curryN';
-
 // Utility
 function isFunction(obj) {
   return !!(obj && obj.constructor && obj.call && obj.apply);
@@ -67,8 +65,8 @@ flyd.stream['fantasy-land/of'] = flyd.stream.of = flyd.stream;
  *   return n1() > n2() ? n1() : n2();
  * }, [n1, n2]);
  */
-flyd.combine = curryN(2, combine);
 function combine(fn, streams) {
+  if (!streams) return (ss) => combine(fn, ss);
   var i, s, deps, depEndStreams;
   var endStream = createDependentStream([], trueFn);
   deps = []; depEndStreams = [];
@@ -88,7 +86,7 @@ function combine(fn, streams) {
   updateStream(s);
   return s;
 }
-
+flyd.combine = combine;
 /**
  * Returns `true` if the supplied argument is a Flyd stream and `false` otherwise.
  *
@@ -185,9 +183,10 @@ flyd.endsOn = function(endS, s) {
  */
 // Library functions use self callback to accept (null, undefined) update triggers.
 function map(f, s) {
+  if (!s) return ss => map(f, ss);
   return combine(function(s, self) { self(f(s.val)); }, [s]);
 }
-flyd.map = curryN(2, map);
+flyd.map = map;
 
 /**
  * Chain a stream
@@ -210,7 +209,8 @@ flyd.map = curryN(2, map);
  *   return flyd.stream(findUsers(filter));
  * }, filter);
  */
-flyd.chain = curryN(2, chain);
+// flyd.chain = curryN(2,chain);
+flyd.chain = chain;
 
 /**
  * Apply a stream
@@ -236,7 +236,7 @@ flyd.chain = curryN(2, chain);
  *   .pipe(ap(n2));
  * added_pipe() // 3
  */
-flyd.ap = curryN(2, ap);
+flyd.ap = ap;
 
 /**
  * Listen to stream events
@@ -252,9 +252,10 @@ flyd.ap = curryN(2, ap);
  * @param {stream} stream - the stream
  * @return {stream} an empty stream (can be ended)
  */
-flyd.on = curryN(2, function(f, s) {
+flyd.on = function(f, s) {
+  if (!s) return ss => flyd.on(f, ss);
   return combine(function(s) { f(s.val); }, [s]);
-});
+};
 
 /**
  * Creates a new stream with the results of calling the function on every incoming
@@ -274,13 +275,15 @@ flyd.on = curryN(2, function(f, s) {
  * numbers(2)(3)(5);
  * sum(); // 10
  */
-flyd.scan = curryN(3, function(f, acc, s) {
+flyd.scan = function(f, acc, s) {
+  if ([null, undefined].includes(acc)) return function(acc1, s1) { return flyd.scan(f, acc1, s1)}
+  else if (!s) return function(s2) { return flyd.scan(f, acc, s2)}
   var ns = combine(function(s, self) {
     self(acc = f(acc, s.val));
   }, [s]);
   if (!ns.hasVal) ns(acc);
   return ns;
-});
+};
 
 /**
  * Creates a new stream down which all values from both `stream1` and `stream2`
@@ -300,7 +303,8 @@ flyd.scan = curryN(3, function(f, acc, s) {
  * button2Elm.addEventListener(btn2Clicks);
  * var allClicks = flyd.merge(btn1Clicks, btn2Clicks);
  */
-flyd.merge = curryN(2, function(s1, s2) {
+flyd.merge = function(s1, s2) {
+  if (!s2) return (ss) => flyd.merge(s1, ss);
   var s = flyd.immediate(combine(function(s1, s2, self, changed) {
     if (changed[0]) {
       self(changed[0]());
@@ -314,7 +318,7 @@ flyd.merge = curryN(2, function(s1, s2) {
     return true;
   }, [s1.end, s2.end]), s);
   return s;
-});
+};
 
 /**
  * Creates a new stream resulting from applying `transducer` to `stream`.
@@ -337,7 +341,8 @@ flyd.merge = curryN(2, function(s1, s2) {
  * s1(1)(1)(2)(3)(3)(3)(4);
  * results; // => [2, 4, 6, 8]
  */
-flyd.transduce = curryN(2, function(xform, source) {
+flyd.transduce = function(xform, source) {
+  if (!source) return ss => flyd.transduce(xform, ss)
   xform = xform(new StreamTransformer());
   return combine(function(source, self) {
     var res = xform['@@transducer/step'](undefined, source.val);
@@ -348,7 +353,7 @@ flyd.transduce = curryN(2, function(xform, source) {
       return res;
     }
   }, [source]);
-});
+};
 
 /**
  * Returns `fn` curried to `n`. Use this function to curry functions exposed by
@@ -365,7 +370,11 @@ flyd.transduce = curryN(2, function(xform, source) {
  * var a = flyd.curryN(2, add);
  * a(2)(4) // => 6
  */
-flyd.curryN = curryN;
+flyd.curryN = (number, fn) =>
+  function _curry(...args) {
+    if (arguments.length >= fn.length) return fn(...args);
+    return (...argsN)=> _curry(...args, ...argsN);
+  };
 
 /**
  * Returns a new stream identical to the original except every
@@ -407,6 +416,7 @@ function boundChain(f) {
 
 function chain(f, s) {
   // Internal state to end flat map stream
+  if (!s) return ss => chain(f, ss);
   var flatEnd = flyd.stream(1);
   var internalEnded = flyd.on(function() {
     var alive = flatEnd() - 1;
@@ -473,6 +483,7 @@ flyd.flattenPromise = function flattenPromise(s) {
  * var added = addToNumbers1.ap(numbers2);
  */
 function ap(s2, s1) {
+  if (!s1) return ss => ap(s2, ss);
   return combine(function(s1, s2, self) { self(s1.val(s2.val)); }, [s1, s2]);
 }
 
@@ -527,8 +538,8 @@ function streamToString() {
  * @return {Function} a flyd stream
  */
 function createStream() {
-  function s(n) {
-    s.push(n);
+  function s() {
+    return s.push.apply(this, arguments);
   }
   s.push = function(n) {
     if (arguments.length === 0) return s.val
