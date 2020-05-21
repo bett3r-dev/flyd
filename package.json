@@ -1,6 +1,6 @@
 {
   "name": "@tomasruizr/flyd",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "The less is more, modular, functional reactive programming library",
   "main": "lib/index.js",
   "unpkg": "flyd.min.js",
