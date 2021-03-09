@@ -539,9 +539,9 @@ function streamToString() {
  */
 function createStream() {
   function s() {
-    return s.push.apply(this, arguments);
+    return s._push.apply(this, arguments);
   }
-  s.push = function(n) {
+  s._push = function(n) {
     if (arguments.length === 0) return s.val
     updateStreamValue(n, s);
     return s
