@@ -1,5 +1,5 @@
 {
-  "name": "@tomasruizr/flyd",
+  "name": "@bett3r-dev/flyd",
   "version": "0.3.4",
   "description": "The less is more, modular, functional reactive programming library",
   "main": "lib/index.js",
