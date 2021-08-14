@@ -86,7 +86,7 @@ declare namespace flyd {
   }
 }
 
-declare module '@tomasruizr/flyd' {
+declare module '@bett3r-dev/flyd' {
   const f: flyd.Static;
   export = f;
 }
