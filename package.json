@@ -3,9 +3,11 @@
   "version": "0.3.4",
   "description": "The less is more, modular, functional reactive programming library",
   "main": "lib/index.js",
+  "types": "index.d.ts",
   "unpkg": "flyd.min.js",
   "files": [
     "lib",
+    "index.d.ts",
     "flyd.min.js"
   ],
   "directories": {
