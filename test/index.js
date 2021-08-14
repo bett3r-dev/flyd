@@ -2,6 +2,7 @@ var assert = require('assert');
 var Promise = require('bluebird');
 var R = require('ramda');
 var t = require('transducers.js');
+const sinon = require('sinon');
 
 var flyd = require('../lib');
 var stream = flyd.stream;
@@ -19,6 +20,10 @@ describe('stream', function() {
   it('can be set with initial value', function() {
     var s = stream(12);
     assert.equal(s(), 12);
+    s(13);
+    assert.equal(s(), 13);
+    s(15);
+    assert.equal(s(), 15);
   });
   it('can be set', function() {
     var s = stream();
@@ -245,6 +250,41 @@ describe('stream', function() {
         1, 0, 2, 0, 2, 3, 4, 3
       ]);
     });
+    it('can combine more than 2 streams', () => {
+      var a = flyd.stream(0);
+      var b = flyd.stream(10);
+      var c = flyd.stream(100);
+      const mock1 = sinon.spy();
+      const mock2 = sinon.spy();
+      const mock3 = sinon.spy();
+      flyd.combine((a, self, changed) => {
+        if (changed.length) {
+          self(changed[0]());
+        }
+      },[a]).map(mock1)
+      flyd.combine((a, b, self, changed) => {
+        if (changed.length) {
+          self(changed[0]());
+        }
+      },[a, b]).map(mock2)
+      flyd.combine((a, b, c, self, changed) => {
+        if (changed.length) {
+          self(changed[0]());
+        }
+      },[a, b, c]).map(mock3)
+      a(1);
+      b(11);
+      c(101);
+      assert(mock1.calledOnce)
+      assert(mock2.calledTwice)
+      assert(mock3.calledThrice)
+      assert(mock1.firstCall.calledWith(1))
+      assert(mock2.firstCall.calledWith(1))
+      assert(mock2.secondCall.calledWith(11))
+      assert(mock3.firstCall.calledWith(1))
+      assert(mock3.secondCall.calledWith(11))
+      assert(mock3.thirdCall.calledWith(101))
+    })
   });
 
   describe('streams created within dependent stream bodies', function() {
